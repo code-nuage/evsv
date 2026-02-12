@@ -1,11 +1,13 @@
+local type Args = require("argparse").Args
+
+require("setup")()
 local args = require("cli")
 
-local command_save = require("Commands.save")
+local commands: {string:function(args: Args)} = {
+   init = require("Commands.init"),
+   module = require("Commands.module")
+}
 
-if args.init then
+local c: string = args.command as string
 
-elseif args.save then
-   command_save(args.file as string)
-elseif args.load then
-
-end
+if commands[c] then commands[c](args) end

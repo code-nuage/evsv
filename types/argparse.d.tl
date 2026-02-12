@@ -96,6 +96,9 @@ local record argparse
 		flag: function(self: Command, string, string): Option
 
 		handle_options: function(self: Command, boolean): Command
+
+		command: function(self: Command, name: string, description?: string, epilog?: string): Command
+		command_target: function(self: Command, command_target: string): Command
 	end
 
 	metamethod __call: function(self: argparse, name?: string, description?: string, epilog?: string): Parser
