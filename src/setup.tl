@@ -1,44 +1,37 @@
 local fs <const> = require("fs")
-local colors <const> = require("ansicolors")
+local log <const> = require("log")
+local paths <const> = require("paths")
 
-local config_path = fs.config_dir .. "/evsv"
+local function ensure_dir(path: string)
+   local ok, err = fs.mkdir_recursive(path)
+
+   if not ok then
+      log(3, "Failed to create %{yellow}" .. path .. "%{reset}: " .. err)
+      return
+   end
+   log(1, "Created %{yellow}" .. path)
+end
+
+local function ensure_file(path: string, content?: string)
+   local ok, err = fs.write_file(path, content)
+
+   if not ok then
+      log(3, "Failed to create %{yellow}" .. path .. "%{reset}: " .. err)
+      return
+   end
+   log(1, "Created %{yellow}" .. path .. "%{reset}")
+end
 
 return function()
-   local ok, err: boolean, string
-   if not (fs.exists(config_path) and fs.is_directory(config_path)) then
-      io.write(colors("%{bright blue}It seems that it's the first time you use evsv.\n"))
-      io.write(colors("Creating %{yellow}" .. config_path .. "%{reset}\n"))
-      ok, err = fs.mkdir_recursive(config_path)
-      if not ok then
-         error(colors("%{bright red}" .. err))
-      end
+   if not (fs.exists(paths.config) and fs.is_directory(paths.config)) then
+      log(1, "%{bright blue}It seems that it's the first time you use evsv.%{reset}")
 
-      ok, err = fs.mkdir(config_path .. "/Templates")
-      if not ok then
-         error(colors("%{bright red}" .. err))
-      end
-
-      ok, err = fs.mkdir(config_path .. "/Modules")
-      if not ok then
-         error(colors("%{bright red}" .. err))
-      end
-
-      ok, err = fs.write_file(config_path .. "/evasive.lua", [[return {
-   host = "0.0.0.0",
-   port = 8080
+      ensure_dir(paths.modules)
+      ensure_dir(paths.templates)
+      ensure_file(paths.project_config, [[{
+   "host": "0.0.0.0",
+   "port": 8080
 }
 ]])
-      if not ok then
-         error(colors("%{bright red}" .. err))
-      end
-      
-      ok, err = fs.write_file(config_path .. "/evasive.tl", [[return {
-   host = "0.0.0.0",
-   port = 8080
-} as string
-]])
-      if not ok then
-         error(colors("%{bright red}" .. err))
-      end
    end
 end
